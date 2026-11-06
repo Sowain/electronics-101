@@ -83,6 +83,11 @@ input[type=range]{width:100%;accent-color:var(--cyan);height:26px}
 
 <script src="three.min.js"></script>
 <script>
+if (typeof THREE === 'undefined') {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"><\/script>');
+}
+</script>
+<script>
 (function(){
   const Vbat = 9;
   const state = { lesson:1, R1:220, R2:220, path:'closed' };
