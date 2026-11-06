@@ -3,469 +3,525 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<title>إلكترونيات ١٠١ · سلسلة وتوازي</title>
+<title>إلكترونيات ١٠١ · Three.js</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b1020; --card:#121a2e; --ink:#e8eefc; --muted:#8b9bb8;
-  --cyan:#3de7ff; --amber:#ffb84a; --pink:#ff6b9d; --green:#5dffb0;
-  --wire:#5a6a88; --led:#ffd56a; --line:rgba(61,231,255,.18);
+  --bg:#070b16; --panel:#0e1628; --ink:#e9f0ff; --muted:#8da0c0;
+  --cyan:#3de7ff; --amber:#ffb84a; --pink:#ff6b9d; --green:#5dffb0; --line:rgba(61,231,255,.2);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
-  font-family:Cairo,Tahoma,sans-serif}
-body{background-image:
-  radial-gradient(ellipse 80% 50% at 50% -10%,rgba(61,231,255,.12),transparent),
-  radial-gradient(ellipse 60% 40% at 100% 100%,rgba(255,184,74,.08),transparent)}
-button,input,label{font:inherit;color:inherit}
-button{cursor:pointer}
-.app{max-width:920px;margin:0 auto;padding:12px 12px 28px;display:grid;gap:12px}
-.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{background:linear-gradient(135deg,rgba(61,231,255,.2),rgba(255,184,74,.15));
-  border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:900;font-size:.85rem;
-  color:var(--cyan)}
-h1{margin:0;font-size:1.2rem;font-weight:900;letter-spacing:-.02em}
-.sub{color:var(--muted);font-size:.85rem;margin:0;width:100%}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
-.tabs button{flex:1;min-width:96px;border:1px solid var(--line);background:rgba(18,26,46,.8);
-  border-radius:14px;padding:10px 8px;font-weight:800;font-size:.9rem;color:var(--muted);
-  transition:.2s}
-.tabs button.on{background:rgba(61,231,255,.12);border-color:var(--cyan);color:var(--cyan);
-  box-shadow:0 0 20px rgba(61,231,255,.15)}
-.tabs button .n{display:block;font-size:.7rem;opacity:.7;font-weight:700}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;
-  box-shadow:0 8px 32px rgba(0,0,0,.35)}
-.stage{position:relative;overflow:hidden;min-height:280px}
-svg.circuit{width:100%;height:auto;display:block;max-height:340px}
-.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.g{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
-.g .k{font-size:.72rem;color:var(--muted);font-weight:700}
-.g .v{font-size:1.15rem;font-weight:900;direction:ltr;unicode-bidi:plaintext;margin-top:2px}
-.g .v.cyan{color:var(--cyan)}.g .v.amber{color:var(--amber)}.g .v.green{color:var(--green)}
-.controls{display:grid;gap:12px}
-.row{display:grid;gap:6px}
-.row label{display:flex;justify-content:space-between;font-weight:800;font-size:.9rem}
-.row label span.val{direction:ltr;unicode-bidi:plaintext;color:var(--amber)}
-input[type=range]{width:100%;accent-color:var(--cyan);height:28px}
-.tip{background:rgba(61,231,255,.06);border:1px solid var(--line);border-radius:14px;
-  padding:12px 14px;line-height:1.7;font-size:.92rem;color:#c9d6ef}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,sans-serif;overflow:hidden}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+#view{position:fixed;inset:0;z-index:0}
+.ui{position:fixed;inset:0;z-index:2;pointer-events:none;display:flex;flex-direction:column}
+.ui > *{pointer-events:auto}
+.top{padding:10px 12px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  background:linear-gradient(180deg,rgba(7,11,22,.92),rgba(7,11,22,0))}
+.badge{background:rgba(61,231,255,.12);border:1px solid var(--line);border-radius:999px;
+  padding:3px 11px;font-weight:900;font-size:.78rem;color:var(--cyan)}
+h1{margin:0;font-size:1.05rem;font-weight:900}
+.sub{width:100%;margin:0;color:var(--muted);font-size:.78rem}
+.tabs{display:flex;gap:6px;padding:8px 12px;overflow-x:auto}
+.tabs button{flex:1;min-width:90px;border:1px solid var(--line);background:rgba(14,22,40,.85);
+  backdrop-filter:blur(8px);border-radius:14px;padding:8px 6px;font-weight:800;font-size:.85rem;color:var(--muted)}
+.tabs button.on{border-color:var(--cyan);color:var(--cyan);background:rgba(61,231,255,.12);
+  box-shadow:0 0 18px rgba(61,231,255,.2)}
+.tabs button .n{display:block;font-size:.65rem;opacity:.7}
+.spacer{flex:1}
+.bottom{padding:0 12px 12px;display:grid;gap:8px;max-width:720px;width:100%;margin:0 auto;
+  background:linear-gradient(0deg,rgba(7,11,22,.95) 70%,rgba(7,11,22,0))}
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.g{background:rgba(14,22,40,.88);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;backdrop-filter:blur(8px)}
+.g .k{font-size:.68rem;color:var(--muted);font-weight:700}
+.g .v{font-size:1.05rem;font-weight:900;direction:ltr;unicode-bidi:plaintext}
+.g .cyan{color:var(--cyan)}.g .amber{color:var(--amber)}.g .green{color:var(--green)}
+.panel{background:rgba(14,22,40,.9);border:1px solid var(--line);border-radius:14px;padding:10px;backdrop-filter:blur(10px)}
+.row{margin:6px 0}.row label{display:flex;justify-content:space-between;font-weight:800;font-size:.85rem}
+.row .val{direction:ltr;unicode-bidi:plaintext;color:var(--amber)}
+input[type=range]{width:100%;accent-color:var(--cyan);height:26px}
+.switcher{display:flex;gap:6px;margin-bottom:6px}
+.switcher button{flex:1;border:1px solid var(--line);background:rgba(0,0,0,.25);border-radius:10px;padding:8px;font-weight:800;font-size:.85rem}
+.switcher button.on{border-color:var(--amber);color:var(--amber);background:rgba(255,184,74,.12)}
+.tip{font-size:.82rem;line-height:1.65;color:#c5d3ef}
+.tip .why{color:var(--amber);font-weight:900;margin-bottom:2px}
 .tip strong{color:var(--cyan)}
-.tip .why{color:var(--amber);font-weight:800}
-.switcher{display:flex;gap:8px}
-.switcher button{flex:1;border:1px solid var(--line);background:rgba(0,0,0,.2);
-  border-radius:12px;padding:10px;font-weight:800}
-.switcher button.on{border-color:var(--amber);color:var(--amber);background:rgba(255,184,74,.1)}
-.foot{text-align:center;color:var(--muted);font-size:.75rem;padding:4px}
-@media(min-width:760px){
-  .layout{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:start}
-  .stage{min-height:320px}
+.hint{position:fixed;left:12px;bottom:12px;z-index:3;font-size:.7rem;color:var(--muted);
+  background:rgba(14,22,40,.7);padding:4px 8px;border-radius:8px;pointer-events:none}
+@media(min-width:800px){
+  .bottom{display:grid;grid-template-columns:1fr 1.2fr;grid-template-areas:"g g" "c t";max-width:900px}
+  .gauges{grid-area:g}.controls{grid-area:c}.tipbox{grid-area:t}
 }
 </style>
 </head>
 <body>
-<div class="app">
-  <header class="top">
-    <div class="badge">إلكترونيات ١٠١</div>
-    <h1>ثلاث دروس تفاعلية للمبتدئين</h1>
-    <p class="sub">حرّك المقاومات وشوف التيار والضوء يتغيّر — بدون أي سيرفر</p>
-  </header>
-
-  <nav class="tabs" role="tablist">
-    <button type="button" class="on" data-lesson="1" aria-selected="true"><span class="n">١</span>سلسلة</button>
-    <button type="button" data-lesson="2"><span class="n">٢</span>توازي</button>
-    <button type="button" data-lesson="3"><span class="n">٣</span>مفتوحة / قصر</button>
-  </nav>
-
-  <div class="layout">
-    <section class="card stage" id="stage">
-      <svg class="circuit" id="svg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" aria-label="دائرة كهربائية">
-        <defs>
-          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
-          <linearGradient id="batGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd28a"/><stop offset="100%" stop-color="#c97a20"/></linearGradient>
-          <radialGradient id="ledGrad" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#fff6c8"/><stop offset="55%" stop-color="#ffb020"/><stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/></radialGradient>
-        </defs>
-        <rect x="0" y="0" width="640" height="340" fill="transparent"/>
-        <g id="wires"></g>
-        <g id="parts"></g>
-        <g id="particles" filter="url(#glow)"></g>
-        <g id="labels"></g>
-      </svg>
-    </section>
-
-    <div style="display:grid;gap:12px">
-      <section class="card gauges" id="gauges">
-        <div class="g"><div class="k">الجهد V</div><div class="v amber" id="gV">9.0 V</div></div>
-        <div class="g"><div class="k">التيار I</div><div class="v cyan" id="gI">0.00 A</div></div>
-        <div class="g"><div class="k">المقاومة R</div><div class="v green" id="gR">— Ω</div></div>
-      </section>
-
-      <section class="card controls" id="controls"></section>
-      <section class="card tip" id="tip"></section>
-    </div>
+<div id="view"></div>
+<div class="ui">
+  <div class="top">
+    <div class="badge">إلكترونيات ١٠١ · Three.js</div>
+    <h1>ثلاث دروس ثلاثية الأبعاد</h1>
+    <p class="sub">حرّك المقاومات · لف المشهد بإصبعك · التيار يتحرك قدامك</p>
   </div>
-
-  <p class="foot">V · I · R بالرموز اللاتينية · يعمل بعد التحميل بدون نت</p>
+  <nav class="tabs">
+    <button type="button" class="on" data-l="1"><span class="n">١</span>سلسلة</button>
+    <button type="button" data-l="2"><span class="n">٢</span>توازي</button>
+    <button type="button" data-l="3"><span class="n">٣</span>مفتوحة / قصر</button>
+  </nav>
+  <div class="spacer"></div>
+  <div class="bottom">
+    <div class="gauges">
+      <div class="g"><div class="k">الجهد V</div><div class="v amber" id="gV">9.0 V</div></div>
+      <div class="g"><div class="k">التيار I</div><div class="v cyan" id="gI">0 mA</div></div>
+      <div class="g"><div class="k">المقاومة R</div><div class="v green" id="gR">— Ω</div></div>
+    </div>
+    <div class="panel controls" id="controls"></div>
+    <div class="panel tipbox tip" id="tip"></div>
+  </div>
 </div>
+<div class="hint">اسحب للدوران · قرّب بإصبعين</div>
 
+<script src="three.min.js"></script>
 <script>
 (function(){
   const Vbat = 9;
-  const state = {
-    lesson: 1,
-    R1: 220,
-    R2: 220,
-    mode: 'series', // for lesson 2 toggle leftover; lesson1=series fixed,2=parallel fixed
-    path: 'closed', // lesson 3: closed | open | short
-  };
+  const state = { lesson:1, R1:220, R2:220, path:'closed' };
 
-  const $ = (id) => document.getElementById(id);
-  const svg = $('svg');
-  const wires = $('wires');
-  const parts = $('parts');
-  const particles = $('particles');
-  const labels = $('labels');
+  // ---- Three.js setup ----
+  const view = document.getElementById('view');
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, powerPreference:'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x070b16, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  view.appendChild(renderer.domElement);
 
-  // --- math ---
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x070b16, 0.035);
+
+  const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 100);
+  camera.position.set(0, 5.5, 11);
+
+  // soft lights
+  scene.add(new THREE.AmbientLight(0x6a7aaa, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(4, 10, 6); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x3de7ff, 0.35); fill.position.set(-6, 3, -2); scene.add(fill);
+  const rim = new THREE.PointLight(0xffb84a, 0.5, 30); rim.position.set(0, 2, -4); scene.add(rim);
+
+  // floor grid
+  const grid = new THREE.GridHelper(24, 24, 0x1c2a44, 0x121c30);
+  grid.position.y = -0.01; scene.add(grid);
+  const floor = new THREE.Mesh(
+    new THREE.CircleGeometry(14, 64),
+    new THREE.MeshStandardMaterial({ color:0x0a1222, roughness:0.95, metalness:0.1 })
+  );
+  floor.rotation.x = -Math.PI/2; floor.position.y = -0.02; scene.add(floor);
+
+  // orbit-like drag
+  let dragging=false, lx=0, ly=0, theta=0.35, phi=1.15, radius=13;
+  const target = new THREE.Vector3(0, 1.2, 0);
+  function syncCam(){
+    camera.position.x = target.x + radius * Math.sin(phi) * Math.cos(theta);
+    camera.position.y = target.y + radius * Math.cos(phi);
+    camera.position.z = target.z + radius * Math.sin(phi) * Math.sin(theta);
+    camera.lookAt(target);
+  }
+  syncCam();
+  const el = renderer.domElement;
+  el.addEventListener('pointerdown', e=>{ dragging=true; lx=e.clientX; ly=e.clientY; el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointerup', ()=> dragging=false);
+  el.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+    theta -= dx*0.005; phi = Math.max(0.2, Math.min(1.45, phi + dy*0.005));
+    syncCam();
+  });
+  el.addEventListener('wheel', e=>{ e.preventDefault(); radius = Math.max(6, Math.min(22, radius + e.deltaY*0.01)); syncCam(); }, {passive:false});
+  let pinch0=null;
+  el.addEventListener('touchstart', e=>{ if(e.touches.length===2){ const a=e.touches[0],b=e.touches[1]; pinch0=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);} }, {passive:true});
+  el.addEventListener('touchmove', e=>{
+    if(e.touches.length===2 && pinch0){ const a=e.touches[0],b=e.touches[1]; const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); radius=Math.max(6,Math.min(22,radius*(pinch0/d))); pinch0=d; syncCam(); }
+  }, {passive:true});
+  el.addEventListener('touchend', ()=> pinch0=null);
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  // ---- materials ----
+  const matWire = new THREE.MeshStandardMaterial({ color:0x7a8cb0, metalness:0.85, roughness:0.25 });
+  const matWireHot = new THREE.MeshStandardMaterial({ color:0x3de7ff, metalness:0.6, roughness:0.2, emissive:0x0a4050, emissiveIntensity:0.4 });
+  const matAmber = new THREE.MeshStandardMaterial({ color:0xffb84a, metalness:0.5, roughness:0.3, emissive:0xffb84a, emissiveIntensity:0.35 });
+  const matPink = new THREE.MeshStandardMaterial({ color:0xff6b9d, metalness:0.4, roughness:0.35, emissive:0xff6b9d, emissiveIntensity:0.25 });
+  const matBoard = new THREE.MeshStandardMaterial({ color:0x152038, metalness:0.2, roughness:0.7 });
+  const matPlastic = new THREE.MeshStandardMaterial({ color:0x1c2740, metalness:0.15, roughness:0.6 });
+  const matMetal = new THREE.MeshStandardMaterial({ color:0xc0c8d8, metalness:0.9, roughness:0.2 });
+  const matGreen = new THREE.MeshStandardMaterial({ color:0x2a8f5a, metalness:0.3, roughness:0.45 });
+
+  const circuitRoot = new THREE.Group();
+  scene.add(circuitRoot);
+
+  // particle system along paths
+  let pathCurves = []; // THREE.Curve
+  let particleMeshes = [];
+  let particleMeta = []; // {curve, t, speed}
+
+  function clearCircuit(){
+    while(circuitRoot.children.length){
+      const o = circuitRoot.children.pop();
+      o.traverse(c=>{ if(c.geometry) c.geometry.dispose(); });
+      circuitRoot.remove(o);
+    }
+    particleMeshes.forEach(m=>{ scene.remove(m); if(m.geometry) m.geometry.dispose(); });
+    particleMeshes = []; particleMeta = []; pathCurves = [];
+  }
+
+  function makeBattery(x,y,z){
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,1.6,24), matPlastic);
+    body.position.y = 0.8;
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,0.35,24), matAmber);
+    top.position.y = 1.78;
+    const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.22,12), matMetal);
+    tip.position.y = 2.05;
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(0.46,0.46,0.12,24), new THREE.MeshStandardMaterial({color:0xff6b9d,emissive:0xff6b9d,emissiveIntensity:0.2}));
+    band.position.y = 1.2;
+    g.add(body, top, tip, band);
+    // label sprite-ish: thin box
+    const label = makeTextSprite('9V', '#ffb84a');
+    label.position.set(0, 2.5, 0); g.add(label);
+    g.position.set(x,y,z);
+    circuitRoot.add(g);
+    return g;
+  }
+
+  function makeResistor(x,y,z, label, rotY){
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.9, 6, 12), matGreen);
+    body.rotation.z = Math.PI/2;
+    const lead1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.55,8), matMetal);
+    lead1.rotation.z = Math.PI/2; lead1.position.x = -0.85;
+    const lead2 = lead1.clone(); lead2.position.x = 0.85;
+    // stripes
+    [ -0.25, 0, 0.25 ].forEach((ox,i)=>{
+      const s = new THREE.Mesh(new THREE.TorusGeometry(0.23,0.03,8,16), new THREE.MeshStandardMaterial({
+        color:[0xffb84a,0x3de7ff,0xff6b9d][i], emissive:[0xffb84a,0x3de7ff,0xff6b9d][i], emissiveIntensity:0.4
+      }));
+      s.rotation.y = Math.PI/2; s.position.x = ox; g.add(s);
+    });
+    g.add(body, lead1, lead2);
+    const spr = makeTextSprite(label, '#5dffb0');
+    spr.position.set(0, 0.7, 0); g.add(spr);
+    g.position.set(x,y,z); g.rotation.y = rotY||0;
+    circuitRoot.add(g);
+    return g;
+  }
+
+  function makeLED(x,y,z, brightness, name){
+    const g = new THREE.Group();
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.32,0.18,16), matPlastic);
+    const domeMat = new THREE.MeshStandardMaterial({
+      color: brightness>0.02 ? 0xffcc44 : 0x334055,
+      emissive: brightness>0.02 ? 0xffaa22 : 0x000000,
+      emissiveIntensity: brightness * 1.8,
+      transparent:true, opacity: 0.55 + brightness*0.4, roughness:0.2, metalness:0.1
+    });
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(0.32, 20, 16, 0, Math.PI*2, 0, Math.PI/2), domeMat);
+    dome.position.y = 0.1;
+    const glow = new THREE.PointLight(0xffb020, brightness * 2.2, 4.5);
+    glow.position.y = 0.4;
+    // legs
+    const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.55,6), matMetal);
+    leg1.position.set(-0.1,-0.35,0);
+    const leg2 = leg1.clone(); leg2.position.x = 0.1;
+    g.add(base, dome, glow, leg1, leg2);
+    g.userData.domeMat = domeMat; g.userData.glow = glow;
+    const spr = makeTextSprite(name||'LED', '#ffd56a');
+    spr.position.set(0, 1.0, 0); g.add(spr);
+    g.position.set(x,y,z);
+    circuitRoot.add(g);
+    return g;
+  }
+
+  function setLED(led, b){
+    if(!led) return;
+    led.userData.domeMat.emissiveIntensity = b * 1.8;
+    led.userData.domeMat.color.setHex(b>0.02 ? 0xffcc44 : 0x334055);
+    led.userData.domeMat.emissive.setHex(b>0.02 ? 0xffaa22 : 0x000000);
+    led.userData.domeMat.opacity = 0.55 + b*0.4;
+    led.userData.glow.intensity = b * 2.2;
+  }
+
+  function makeWireTube(points, hot){
+    const curve = new THREE.CatmullRomCurve3(points.map(p=> new THREE.Vector3(...p)));
+    const geo = new THREE.TubeGeometry(curve, 64, 0.055, 8, false);
+    const mesh = new THREE.Mesh(geo, hot ? matWireHot : matWire);
+    circuitRoot.add(mesh);
+    return curve;
+  }
+
+  // canvas text sprites
+  const _texCache = {};
+  function makeTextSprite(text, color){
+    const key = text+'|'+color;
+    let tex = _texCache[key];
+    if(!tex){
+      const c = document.createElement('canvas'); c.width=256; c.height=64;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0,0,256,64);
+      ctx.font = '700 28px Cairo,Tahoma,sans-serif';
+      ctx.fillStyle = color; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(text, 128, 32);
+      tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      _texCache[key] = tex;
+    }
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false });
+    const s = new THREE.Sprite(mat); s.scale.set(1.8, 0.45, 1);
+    return s;
+  }
+
+  function addParticles(curves, totalI){
+    const geo = new THREE.SphereGeometry(0.08, 10, 10);
+    const isShort = state.lesson===3 && state.path==='short';
+    curves.forEach((curve, ci)=>{
+      if(!curve) return;
+      const n = isShort ? 18 : 10;
+      const speedScale = curve.userData?.speed || 1;
+      for(let i=0;i<n;i++){
+        const mat = new THREE.MeshBasicMaterial({
+          color: isShort ? 0xffb84a : 0x3de7ff,
+          transparent:true, opacity:0.95
+        });
+        const m = new THREE.Mesh(geo, mat);
+        scene.add(m); particleMeshes.push(m);
+        particleMeta.push({
+          mesh:m, curve,
+          t: i/n,
+          speed: (0.15 + 0.35*speedScale) * (isShort?2.5:1) * Math.min(2, 0.35 + totalI*45)
+        });
+      }
+    });
+  }
+
+  function brightness(I){ return Math.max(0, Math.min(1, I/0.04)); }
+
   function calc(){
-    if(state.lesson === 1){
+    if(state.lesson===1){
       const Req = state.R1 + state.R2;
       const I = Vbat / Req;
-      const V1 = I * state.R1, V2 = I * state.R2;
-      return {Req, I, I1:I, I2:I, V1, V2, bright1: brightness(I), bright2: brightness(I), note:'series'};
+      return {Req, I, I1:I, I2:I, bright1:brightness(I), bright2:brightness(I)};
     }
-    if(state.lesson === 2){
-      const Req = 1 / (1/state.R1 + 1/state.R2);
-      const I1 = Vbat / state.R1, I2 = Vbat / state.R2, I = I1 + I2;
-      return {Req, I, I1, I2, V1:Vbat, V2:Vbat, bright1: brightness(I1), bright2: brightness(I2), note:'parallel'};
+    if(state.lesson===2){
+      const Req = 1/(1/state.R1 + 1/state.R2);
+      const I1 = Vbat/state.R1, I2 = Vbat/state.R2;
+      return {Req, I:I1+I2, I1, I2, bright1:brightness(I1), bright2:brightness(I2)};
     }
-    // lesson 3
-    if(state.path === 'open'){
-      return {Req: Infinity, I:0, I1:0, I2:0, V1:0, V2:0, bright1:0, bright2:0, note:'open'};
-    }
-    if(state.path === 'short'){
-      // short across LED path — huge current, LED dark (bypassed), resistor still there partially
-      const Rshort = 0.5; // internal
-      const I = Vbat / Rshort;
-      return {Req: Rshort, I, I1:I, I2:0, V1:0, V2:0, bright1:0, bright2:0, note:'short'};
-    }
-    // closed: battery + R + LED (LED ~2V drop modeled as fixed + series R)
-    const Vled = 2.0;
-    const I = Math.max(0, (Vbat - Vled) / state.R1);
-    return {Req: state.R1, I, I1:I, I2:0, V1: I*state.R1, V2:Vled, bright1: brightness(I), bright2:0, note:'closed'};
+    if(state.path==='open') return {Req:Infinity, I:0, I1:0, I2:0, bright1:0, bright2:0};
+    if(state.path==='short') return {Req:0.5, I:Vbat/0.5, I1:Vbat/0.5, I2:0, bright1:0, bright2:0};
+    const I = Math.max(0, (Vbat-2)/state.R1);
+    return {Req:state.R1, I, I1:I, I2:0, bright1:brightness(I), bright2:0};
   }
 
-  function brightness(I){
-    // map ~0–40mA to 0–1 for LED glow
-    return Math.max(0, Math.min(1, I / 0.04));
-  }
+  let leds = [];
 
-  // --- drawing helpers ---
-  function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
-
-  function el(name, attrs, parent){
-    const n = document.createElementNS('http://www.w3.org/2000/svg', name);
-    for(const k in attrs) n.setAttribute(k, attrs[k]);
-    (parent||svg).appendChild(n);
-    return n;
-  }
-
-  function wirePath(d, extra){
-    return el('path', Object.assign({d, fill:'none', stroke:'var(--wire)', 'stroke-width':3, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, extra||{}), wires);
-  }
-
-  function battery(x,y){
-    const g = el('g', {transform:`translate(${x},${y})`}, parts);
-    el('rect', {x:-18,y:-28,width:36,height:56,rx:6, fill:'#1a2438', stroke:'var(--amber)', 'stroke-width':1.5}, g);
-    el('rect', {x:-12,y:-18,width:24,height:14,rx:2, fill:'url(#batGrad)'}, g);
-    el('rect', {x:-12,y:4,width:24,height:14,rx:2, fill:'#3a4558'}, g);
-    el('text', {x:0,y:-4, fill:'#1a1208', 'font-size':10, 'font-weight':900, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent='+';
-    el('text', {x:0,y:15, fill:'#cdd', 'font-size':10, 'font-weight':900, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent='−';
-    el('text', {x:0,y:42, fill:'var(--amber)', 'font-size':12, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo', direction:'ltr'}, g).textContent='9 V';
-    return g;
-  }
-
-  function resistor(x,y,label,rot){
-    const g = el('g', {transform:`translate(${x},${y}) rotate(${rot||0})`}, parts);
-    const zig = 'M-28,0 L-20,-10 L-10,10 L0,-10 L10,10 L20,-10 L28,0';
-    el('path', {d:zig, fill:'none', stroke:'#9eb0d0', 'stroke-width':3, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, g);
-    el('text', {x:0,y:22, fill:'var(--green)', 'font-size':13, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo', direction:'ltr'}, g).textContent=label;
-    return g;
-  }
-
-  function led(x,y,b,label){
-    const g = el('g', {transform:`translate(${x},${y})`}, parts);
-    const glowR = 8 + b*28;
-    if(b > 0.02){
-      el('circle', {cx:0, cy:0, r:glowR, fill:'url(#ledGrad)', opacity:0.35+b*0.55, filter:'url(#soft)'}, g);
-    }
-    el('circle', {cx:0, cy:0, r:14, fill: b>0.02 ? `rgba(255,${Math.floor(160+80*b)},40,${0.4+0.5*b})` : '#2a3348',
-      stroke: b>0.02 ? '#ffd56a' : '#6a7a98', 'stroke-width':2}, g);
-    el('polygon', {points:'-6,-4 6,0 -6,4', fill: b>0.5 ? '#fff8e0' : '#c8d0e0'}, g);
-    if(label) el('text', {x:0,y:28, fill:'var(--led)', 'font-size':12, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent=label;
-    return g;
-  }
-
-  function labelAt(x,y,text,color){
-    el('text', {x,y, fill:color||'var(--muted)', 'font-size':13, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo'}, labels).textContent=text;
-  }
-
-  // path samples for particles
-  let flowPaths = []; // array of {d, speedScale}
-
-  function drawLesson(){
-    clear(wires); clear(parts); clear(labels); clear(particles);
-    flowPaths = [];
+  function buildScene(){
+    clearCircuit();
+    leds = [];
     const m = calc();
 
-    if(state.lesson === 1){
-      // SERIES: battery left, R1 top, LED1, R2, LED2 bottom back
-      // Layout: bat at (80,170), top wire to R1(220,80), LED1(360,80), R2(500,80), right down, bottom back
-      battery(80,170);
-      resistor(220,80, `R1 ${state.R1}Ω`);
-      led(360,80, m.bright1, 'LED1');
-      resistor(500,80, `R2 ${state.R2}Ω`);
-      led(500,260, m.bright2, 'LED2');
+    // breadboard base
+    const board = new THREE.Mesh(new THREE.BoxGeometry(10, 0.15, 5.2), matBoard);
+    board.position.set(0, 0, 0); circuitRoot.add(board);
+    const rim = new THREE.Mesh(new THREE.BoxGeometry(10.2, 0.08, 5.4), new THREE.MeshStandardMaterial({color:0x0c1424, metalness:0.3, roughness:0.5}));
+    rim.position.set(0,-0.1,0); circuitRoot.add(rim);
 
-      // wires
-      wirePath('M80,142 L80,80 L192,80'); // bat+ to R1
-      wirePath('M248,80 L346,80'); // R1 to LED1
-      wirePath('M374,80 L472,80'); // LED1 to R2
-      wirePath('M528,80 L560,80 L560,260 L514,260'); // R2 to LED2
-      wirePath('M486,260 L80,260 L80,198'); // LED2 back to bat-
-
-      flowPaths = [
-        {d:'M80,142 L80,80 L192,80 L248,80 L346,80 L374,80 L472,80 L528,80 L560,80 L560,260 L514,260 L486,260 L80,260 L80,198', speed:1}
-      ];
-      labelAt(320,40, 'نفس التيار يمر على الكل · I₁ = I₂', 'var(--cyan)');
-      labelAt(320,310, `V₁=${m.V1.toFixed(1)}V  ·  V₂=${m.V2.toFixed(1)}V  ·  المجموع ${Vbat}V`, 'var(--amber)');
-    }
-
-    if(state.lesson === 2){
-      // PARALLEL: two branches
-      battery(80,170);
-      resistor(300,90, `R1 ${state.R1}Ω`);
-      led(460,90, m.bright1, 'LED1');
-      resistor(300,250, `R2 ${state.R2}Ω`);
-      led(460,250, m.bright2, 'LED2');
-
-      wirePath('M80,142 L80,70 L240,70'); // top rail start
-      wirePath('M240,70 L272,90'); // into R1
-      wirePath('M328,90 L446,90'); // R1 to LED1
-      wirePath('M474,90 L560,90 L560,170'); // LED1 to right rail
-
-      wirePath('M80,198 L80,270 L240,270'); // bottom from bat
-      wirePath('M240,270 L272,250');
-      wirePath('M328,250 L446,250');
-      wirePath('M474,250 L560,250 L560,170');
-
-      // junction markers
-      el('circle',{cx:240,cy:70,r:4,fill:'var(--cyan)'},parts);
-      el('circle',{cx:240,cy:270,r:4,fill:'var(--cyan)'},parts);
-      el('circle',{cx:560,cy:170,r:4,fill:'var(--cyan)'},parts);
-      // left split visual
-      wirePath('M80,170 L240,170', {stroke:'var(--wire)', 'stroke-dasharray':'4 6', opacity:.4});
-      wirePath('M240,70 L240,270');
-      wirePath('M80,142 L80,198'); // bat body already has terminals
-
-      flowPaths = [
-        {d:'M80,142 L80,70 L240,70 L272,90 L328,90 L446,90 L474,90 L560,90 L560,170', speed: m.I1 / Math.max(m.I,1e-9)},
-        {d:'M80,198 L80,270 L240,270 L272,250 L328,250 L446,250 L474,250 L560,250 L560,170', speed: m.I2 / Math.max(m.I,1e-9)},
-        {d:'M560,170 L80,170 L80,198', speed:1} // return - simplified visual along mid then down — actually return to negative
-      ];
-      // better return path particles from right rail to bat negative
-      flowPaths[2] = {d:'M560,170 L560,198 C560,198 80,198 80,198', speed:1};
-
-      labelAt(320,30, 'نفس الجهد على الفرعين · V₁ = V₂ = 9V', 'var(--cyan)');
-      labelAt(320,320, `I₁=${(m.I1*1000).toFixed(0)}mA  ·  I₂=${(m.I2*1000).toFixed(0)}mA  ·  الكلي ${(m.I*1000).toFixed(0)}mA`, 'var(--amber)');
-    }
-
-    if(state.lesson === 3){
-      battery(100,170);
-      resistor(300,100, `R ${state.R1}Ω`);
-      led(480,170, m.bright1, 'LED');
-
-      // main loop
-      wirePath('M100,142 L100,100 L272,100'); // to R
-      wirePath('M328,100 L480,100 L480,156'); // to LED top
-      wirePath('M480,184 L480,240 L100,240 L100,198'); // back
-
-      if(state.path === 'open'){
-        // gap in top wire after resistor
-        clear(wires); clear(parts); clear(labels);
-        battery(100,170);
-        resistor(300,100, `R ${state.R1}Ω`);
-        led(480,170, 0, 'LED');
-        wirePath('M100,142 L100,100 L272,100');
-        wirePath('M328,100 L400,100'); // stops — open
-        wirePath('M430,100 L480,100 L480,156');
-        // open gap markers
-        el('circle',{cx:405,cy:100,r:5,fill:'none',stroke:'var(--pink)','stroke-width':2},parts);
-        el('circle',{cx:425,cy:100,r:5,fill:'none',stroke:'var(--pink)','stroke-width':2},parts);
-        labelAt(415,80, 'فتحة · ما في مسار', 'var(--pink)');
-        wirePath('M480,184 L480,240 L100,240 L100,198');
-        flowPaths = [];
-        labelAt(320,300, 'دائرة مفتوحة = تيار صفر = الضوء يطفي', 'var(--pink)');
-      } else if(state.path === 'short'){
-        clear(wires); clear(parts); clear(labels);
-        battery(100,170);
-        resistor(300,100, `R ${state.R1}Ω`);
-        led(480,170, 0, 'LED');
-        wirePath('M100,142 L100,100 L272,100');
-        wirePath('M328,100 L480,100 L480,156');
-        wirePath('M480,184 L480,240 L100,240 L100,198');
-        // short wire bypassing LED (thick amber)
-        wirePath('M400,100 L400,240', {stroke:'var(--amber)', 'stroke-width':4});
-        labelAt(370,170, 'قصر!', 'var(--amber)');
-        el('text',{x:455,y:210,fill:'var(--muted)','font-size':11,'font-weight':700,'text-anchor':'middle','font-family':'Cairo'},labels).textContent='LED متجاوَز';
-        flowPaths = [
-          {d:'M100,142 L100,100 L272,100 L328,100 L400,100 L400,240 L100,240 L100,198', speed:2}
-        ];
-        labelAt(320,300, 'القصر مسار سهل — تيار كبير وخطر، والضوء ينطفي', 'var(--amber)');
-      } else {
-        flowPaths = [
-          {d:'M100,142 L100,100 L272,100 L328,100 L480,100 L480,156 L480,184 L480,240 L100,240 L100,198', speed:1}
-        ];
-        labelAt(320,300, 'دائرة مغلقة سليمة — التيار يمر عبر R والـ LED', 'var(--green)');
-      }
-    }
-
-    updateGauges(m);
-    updateTip(m);
-    rebuildParticles(m);
-  }
-
-  function updateGauges(m){
-    $('gV').textContent = Vbat.toFixed(1) + ' V';
-    if(!isFinite(m.Req)){
-      $('gI').textContent = '0 mA';
-      $('gR').textContent = '∞';
-    } else if(state.lesson===3 && state.path==='short'){
-      $('gI').textContent = (m.I).toFixed(1) + ' A !';
-      $('gR').textContent = '≈0 Ω';
-    } else {
-      $('gI').textContent = (m.I*1000).toFixed(1) + ' mA';
-      $('gR').textContent = (m.Req >= 100 ? m.Req.toFixed(0) : m.Req.toFixed(1)) + ' Ω';
-    }
-  }
-
-  function updateTip(m){
-    const tip = $('tip');
     if(state.lesson===1){
-      tip.innerHTML = `<div class="why">ليش الضوءين نفس القوة تقريبًا؟</div>
-        في <strong>التوصيل على التوالي (Series)</strong> التيار واحد يمر على كل القطع بالترتيب.
-        المقاومة الكلية = R1 + R2 = <span dir="ltr">${m.Req.toFixed(0)} Ω</span>.
-        كل مقاومة تاخذ جزء من الجهد، ولو زوّدت R يقل التيار ويخفت الضوءين معًا.`;
-    } else if(state.lesson===2){
-      tip.innerHTML = `<div class="why">ليش كل فرع مستقل؟</div>
-        في <strong>التوازي (Parallel)</strong> كل فرع ياخذ نفس الجهد (${Vbat} V).
-        التيار ينقسم: الفرع الأصغر مقاومةً ياخذ تيار أكثر ويضيء أقوى.
-        R الكلية = <span dir="ltr">${m.Req.toFixed(0)} Ω</span> (أقل من أصغر مقاومة).`;
-    } else {
+      makeBattery(-4, 0.08, 0);
+      makeResistor(-1.5, 0.55, -1.4, 'R1 '+state.R1+'Ω');
+      leds.push(makeLED(1.0, 0.35, -1.4, m.bright1, 'LED1'));
+      makeResistor(3.2, 0.55, 0, 'R2 '+state.R2+'Ω', Math.PI/2);
+      leds.push(makeLED(1.0, 0.35, 1.4, m.bright2, 'LED2'));
+
+      const c1 = makeWireTube([[-4,2.05,0],[-4,1.6,-1.4],[-2.4,0.55,-1.4]], true);
+      const c2 = makeWireTube([[-0.6,0.55,-1.4],[1.0,0.55,-1.4]], true);
+      const c3 = makeWireTube([[1.0,0.55,-1.4],[3.2,0.55,-1.4],[3.2,0.55,-0.5]], true);
+      const c4 = makeWireTube([[3.2,0.55,0.5],[3.2,0.55,1.4],[1.0,0.55,1.4]], true);
+      const c5 = makeWireTube([[1.0,0.55,1.4],[-4,0.55,1.4],[-4,0.08,0]], true);
+      c1.userData={speed:1}; c2.userData={speed:1}; c3.userData={speed:1}; c4.userData={speed:1}; c5.userData={speed:1};
+      if(m.I>1e-6) addParticles([c1,c2,c3,c4,c5], m.I);
+      target.set(0,1.0,0); radius=12;
+    }
+
+    if(state.lesson===2){
+      makeBattery(-4, 0.08, 0);
+      makeResistor(-0.5, 0.55, -1.5, 'R1 '+state.R1+'Ω');
+      leds.push(makeLED(2.2, 0.35, -1.5, m.bright1, 'LED1'));
+      makeResistor(-0.5, 0.55, 1.5, 'R2 '+state.R2+'Ω');
+      leds.push(makeLED(2.2, 0.35, 1.5, m.bright2, 'LED2'));
+
+      // rails
+      const top = makeWireTube([[-4,2.05,0],[-4,1.5,-1.5],[-1.4,0.55,-1.5]], true);
+      const top2 = makeWireTube([[0.4,0.55,-1.5],[2.2,0.55,-1.5],[3.8,0.55,-1.5],[3.8,0.55,0]], true);
+      const bot = makeWireTube([[-4,0.08,0],[-4,0.55,1.5],[-1.4,0.55,1.5]], true);
+      const bot2 = makeWireTube([[0.4,0.55,1.5],[2.2,0.55,1.5],[3.8,0.55,1.5],[3.8,0.55,0]], true);
+      const ret = makeWireTube([[3.8,0.55,0],[3.8,0.2,0],[-4,0.2,0],[-4,0.08,0]], true);
+      top.userData={speed:m.I1/Math.max(m.I,1e-9)};
+      top2.userData={speed:m.I1/Math.max(m.I,1e-9)};
+      bot.userData={speed:m.I2/Math.max(m.I,1e-9)};
+      bot2.userData={speed:m.I2/Math.max(m.I,1e-9)};
+      ret.userData={speed:1};
+      if(m.I>1e-6) addParticles([top,top2,bot,bot2,ret], m.I);
+      // junction dots
+      [[-4,1.2,0],[3.8,0.55,0]].forEach(([x,y,z])=>{
+        const d = new THREE.Mesh(new THREE.SphereGeometry(0.12,12,12), matAmber);
+        d.position.set(x,y,z); circuitRoot.add(d);
+      });
+      target.set(0,1.0,0); radius=12.5;
+    }
+
+    if(state.lesson===3){
+      makeBattery(-3.5, 0.08, 0);
+      makeResistor(-0.2, 0.55, -0.2, 'R '+state.R1+'Ω');
+      leds.push(makeLED(2.8, 0.35, 0, m.bright1, 'LED'));
+
       if(state.path==='open'){
-        tip.innerHTML = `<div class="why">دائرة مفتوحة</div>
-          المسار مقطوع — مثل مفتاح مطفي. <strong>I = 0</strong> والضوء ينطفي حتى لو البطارية موجودة.
-          الكهرباء تحتاج حلقة مغلقة عشان تمشي.`;
+        makeWireTube([[-3.5,2.05,0],[-3.5,1.4,-0.2],[-1.1,0.55,-0.2]], false);
+        // gap
+        const gap1 = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), matPink);
+        gap1.position.set(0.9,0.55,-0.2); circuitRoot.add(gap1);
+        const gap2 = gap1.clone(); gap2.position.x = 1.3; circuitRoot.add(gap2);
+        makeWireTube([[1.5,0.55,-0.2],[2.8,0.55,-0.2],[2.8,0.55,0]], false);
+        makeWireTube([[2.8,0.2,0],[2.8,0.2,1.2],[-3.5,0.2,1.2],[-3.5,0.08,0]], false);
+        const openLbl = makeTextSprite('فتحة', '#ff6b9d');
+        openLbl.position.set(1.1, 1.3, -0.2); circuitRoot.add(openLbl);
       } else if(state.path==='short'){
-        tip.innerHTML = `<div class="why">قصر كهربائي (Short)</div>
-          سلك يوفّر طريق أسهل من الـ LED، فالتيار يهرب من الطريق القصير.
-          الـ LED ينطفي والتيار يصير <strong>كبير وخطر</strong> على البطارية والأسلاك. لا تسوي قصر بالبيت!`;
+        makeWireTube([[-3.5,2.05,0],[-3.5,1.4,-0.2],[-1.1,0.55,-0.2]], true);
+        makeWireTube([[0.7,0.55,-0.2],[2.8,0.55,-0.2],[2.8,0.55,0]], false);
+        makeWireTube([[2.8,0.2,0],[2.8,0.2,1.2],[-3.5,0.2,1.2],[-3.5,0.08,0]], true);
+        // short bridge
+        const sc = makeWireTube([[1.2,0.55,-0.2],[1.2,0.55,1.2],[-3.5,0.2,1.2]], true);
+        sc.userData={speed:2};
+        const shortWire = new THREE.Mesh(
+          new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+            new THREE.Vector3(1.2,0.55,-0.2), new THREE.Vector3(1.2,0.9,0.5), new THREE.Vector3(1.2,0.55,1.2)
+          ]), 20, 0.09, 8, false),
+          matAmber
+        );
+        circuitRoot.add(shortWire);
+        const sl = makeTextSprite('قصر!', '#ffb84a');
+        sl.position.set(1.2, 1.6, 0.4); circuitRoot.add(sl);
+        const c1 = makeWireTube([[-3.5,2.05,0],[-3.5,1.4,-0.2],[-1.1,0.55,-0.2],[1.2,0.55,-0.2]], true);
+        const c2 = makeWireTube([[1.2,0.55,1.2],[-3.5,0.2,1.2],[-3.5,0.08,0]], true);
+        c1.userData={speed:2}; c2.userData={speed:2};
+        addParticles([c1,c2], m.I);
       } else {
-        tip.innerHTML = `<div class="why">دائرة مغلقة مع مقاومة</div>
-          المقاومة R تحد التيار عشان الـ LED ما يحترق.
-          قلّل R → تيار أكبر → ضوء أقوى. زوّد R → أخف وأأمن.`;
+        const c1 = makeWireTube([[-3.5,2.05,0],[-3.5,1.4,-0.2],[-1.1,0.55,-0.2]], true);
+        const c2 = makeWireTube([[0.7,0.55,-0.2],[2.8,0.55,-0.2],[2.8,0.55,0]], true);
+        const c3 = makeWireTube([[2.8,0.2,0],[2.8,0.2,1.2],[-3.5,0.2,1.2],[-3.5,0.08,0]], true);
+        c1.userData={speed:1}; c2.userData={speed:1}; c3.userData={speed:1};
+        if(m.I>1e-6) addParticles([c1,c2,c3], m.I);
       }
+      target.set(0,1.0,0); radius=11.5;
+    }
+
+    syncCam();
+    updateUI(m);
+  }
+
+  function updateUI(m){
+    document.getElementById('gV').textContent = Vbat.toFixed(1)+' V';
+    if(!isFinite(m.Req)){
+      document.getElementById('gI').textContent = '0 mA';
+      document.getElementById('gR').textContent = '∞';
+    } else if(state.lesson===3 && state.path==='short'){
+      document.getElementById('gI').textContent = m.I.toFixed(1)+' A !';
+      document.getElementById('gR').textContent = '≈0 Ω';
+    } else {
+      document.getElementById('gI').textContent = (m.I*1000).toFixed(1)+' mA';
+      document.getElementById('gR').textContent = (m.Req>=100?m.Req.toFixed(0):m.Req.toFixed(1))+' Ω';
+    }
+    const tip = document.getElementById('tip');
+    if(state.lesson===1){
+      tip.innerHTML = `<div class="why">سلسلة (Series) — ليش الضوءين سوا؟</div>
+        التيار <strong>واحد</strong> يمر على كل القطع بالترتيب. R الكلية = R1+R2 = <span dir="ltr">${m.Req.toFixed(0)}Ω</span>.
+        زوّد أي مقاومة → يقل التيار → يخفت الضوءين معًا.`;
+    } else if(state.lesson===2){
+      tip.innerHTML = `<div class="why">توازي (Parallel) — كل فرع لحاله</div>
+        نفس الجهد على الفرعين (${Vbat}V). التيار ينقسم: الفرع الأقل R ياخذ تيار أكثر ويضيء أقوى.
+        R الكلية = <span dir="ltr">${m.Req.toFixed(0)}Ω</span> (أقل من أصغر مقاومة).`;
+    } else if(state.path==='open'){
+      tip.innerHTML = `<div class="why">دائرة مفتوحة</div>المسار مقطوع — <strong>I = 0</strong> والضوء يطفي. الكهرباء تحتاج حلقة مغلقة.`;
+    } else if(state.path==='short'){
+      tip.innerHTML = `<div class="why">قصر كهربائي</div>طريق سهل يتجاوز الـ LED → تيار <strong>كبير وخطر</strong> والضوء ينطفي. لا تسوي قصر بالبيت!`;
+    } else {
+      tip.innerHTML = `<div class="why">دائرة مغلقة + مقاومة</div>R تحد التيار عشان الـ LED ما يحترق. قلّل R → أقوى. زوّد R → أخف وأأمن.`;
     }
   }
 
-  // --- controls ---
   function renderControls(){
-    const c = $('controls');
+    const c = document.getElementById('controls');
     let html = '';
     if(state.lesson===1 || state.lesson===2){
-      html += rowHTML('R1', 'R1', state.R1, 50, 1000);
-      html += rowHTML('R2', 'R2', state.R2, 50, 1000);
+      html += row('R1','R1',state.R1)+row('R2','R2',state.R2);
     } else {
       html += `<div class="switcher">
-        <button type="button" data-path="closed" class="${state.path==='closed'?'on':''}">مغلقة</button>
-        <button type="button" data-path="open" class="${state.path==='open'?'on':''}">مفتوحة</button>
-        <button type="button" data-path="short" class="${state.path==='short'?'on':''}">قصر</button>
+        <button type="button" data-p="closed" class="${state.path==='closed'?'on':''}">مغلقة</button>
+        <button type="button" data-p="open" class="${state.path==='open'?'on':''}">مفتوحة</button>
+        <button type="button" data-p="short" class="${state.path==='short'?'on':''}">قصر</button>
       </div>`;
-      html += rowHTML('R1', 'المقاومة R', state.R1, 50, 1000);
+      html += row('R1','المقاومة R',state.R1);
     }
     c.innerHTML = html;
     c.querySelectorAll('input[type=range]').forEach(inp=>{
       inp.addEventListener('input', ()=>{
         state[inp.dataset.key] = +inp.value;
-        drawLesson();
-        // update label
-        const lab = inp.previousElementSibling?.querySelector('.val');
-        if(lab) lab.textContent = inp.value + ' Ω';
+        // live LED + gauges without full rebuild when only R changes in lesson 1/2/3-closed
+        const m = calc();
+        updateUI(m);
+        inp.previousElementSibling.querySelector('.val').textContent = inp.value+' Ω';
+        // rebuild to refresh labels + particle speeds
+        buildScene();
       });
     });
-    c.querySelectorAll('[data-path]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        state.path = btn.dataset.path;
-        renderControls();
-        drawLesson();
-      });
+    c.querySelectorAll('[data-p]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.path = btn.dataset.p; renderControls(); buildScene(); });
     });
   }
-
-  function rowHTML(key, title, val, min, max){
+  function row(key,title,val){
     return `<div class="row"><label>${title}<span class="val">${val} Ω</span></label>
-      <input type="range" min="${min}" max="${max}" step="10" value="${val}" data-key="${key}"></div>`;
+      <input type="range" min="50" max="1000" step="10" value="${val}" data-key="${key}"></div>`;
   }
 
-  // --- particles ---
-  let particleObjs = [];
-  let lastT = 0;
-
-  function rebuildParticles(m){
-    clear(particles);
-    particleObjs = [];
-    if(m.I < 1e-6 && state.path !== 'short') return;
-    const countBase = state.lesson===3 && state.path==='short' ? 28 : 14;
-    flowPaths.forEach((fp, pi)=>{
-      const pathEl = el('path', {d:fp.d, fill:'none', stroke:'none'}, particles);
-      const len = pathEl.getTotalLength();
-      const n = Math.max(4, Math.round(countBase * (fp.speed||1)));
-      for(let i=0;i<n;i++){
-        const c = el('circle', {r: state.path==='short'?3.2:2.6, fill: state.path==='short'?'var(--amber)':'var(--cyan)', opacity:.9}, particles);
-        particleObjs.push({el:c, path:pathEl, len, t: i/n, speed:(0.12 + 0.25*(fp.speed||1)) * (state.path==='short'?2.2:1) * Math.min(1.8, 0.4+m.I*40)});
-      }
-    });
-  }
-
-  function tick(ts){
-    if(!lastT) lastT = ts;
-    const dt = Math.min(50, ts - lastT) / 1000;
-    lastT = ts;
-    particleObjs.forEach(p=>{
-      p.t = (p.t + p.speed * dt) % 1;
-      const pt = p.path.getPointAtLength(p.t * p.len);
-      p.el.setAttribute('cx', pt.x);
-      p.el.setAttribute('cy', pt.y);
-    });
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-
-  // --- tabs ---
   document.querySelectorAll('.tabs button').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.tabs button').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-selected','false');});
-      btn.classList.add('on'); btn.setAttribute('aria-selected','true');
-      state.lesson = +btn.dataset.lesson;
-      if(state.lesson===3) state.path = 'closed';
-      renderControls();
-      drawLesson();
+      document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      state.lesson = +btn.dataset.l;
+      if(state.lesson===3) state.path='closed';
+      renderControls(); buildScene();
     });
   });
 
+  // animate
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min(0.05, (now-last)/1000); last = now;
+    particleMeta.forEach(p=>{
+      if(p.speed < 1e-4) return;
+      p.t = (p.t + p.speed * dt) % 1;
+      const pt = p.curve.getPointAt(p.t);
+      p.mesh.position.copy(pt);
+    });
+    // gentle idle spin if not dragging
+    if(!dragging){ theta += dt*0.08; syncCam(); }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
   renderControls();
-  drawLesson();
+  buildScene();
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
