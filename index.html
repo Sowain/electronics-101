@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>إلكترونيات ١٠١ · سلسلة وتوازي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b1020; --card:#121a2e; --ink:#e8eefc; --muted:#8b9bb8;
+  --cyan:#3de7ff; --amber:#ffb84a; --pink:#ff6b9d; --green:#5dffb0;
+  --wire:#5a6a88; --led:#ffd56a; --line:rgba(61,231,255,.18);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:Cairo,Tahoma,sans-serif}
+body{background-image:
+  radial-gradient(ellipse 80% 50% at 50% -10%,rgba(61,231,255,.12),transparent),
+  radial-gradient(ellipse 60% 40% at 100% 100%,rgba(255,184,74,.08),transparent)}
+button,input,label{font:inherit;color:inherit}
+button{cursor:pointer}
+.app{max-width:920px;margin:0 auto;padding:12px 12px 28px;display:grid;gap:12px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{background:linear-gradient(135deg,rgba(61,231,255,.2),rgba(255,184,74,.15));
+  border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:900;font-size:.85rem;
+  color:var(--cyan)}
+h1{margin:0;font-size:1.2rem;font-weight:900;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:.85rem;margin:0;width:100%}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.tabs button{flex:1;min-width:96px;border:1px solid var(--line);background:rgba(18,26,46,.8);
+  border-radius:14px;padding:10px 8px;font-weight:800;font-size:.9rem;color:var(--muted);
+  transition:.2s}
+.tabs button.on{background:rgba(61,231,255,.12);border-color:var(--cyan);color:var(--cyan);
+  box-shadow:0 0 20px rgba(61,231,255,.15)}
+.tabs button .n{display:block;font-size:.7rem;opacity:.7;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.35)}
+.stage{position:relative;overflow:hidden;min-height:280px}
+svg.circuit{width:100%;height:auto;display:block;max-height:340px}
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.g{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.g .k{font-size:.72rem;color:var(--muted);font-weight:700}
+.g .v{font-size:1.15rem;font-weight:900;direction:ltr;unicode-bidi:plaintext;margin-top:2px}
+.g .v.cyan{color:var(--cyan)}.g .v.amber{color:var(--amber)}.g .v.green{color:var(--green)}
+.controls{display:grid;gap:12px}
+.row{display:grid;gap:6px}
+.row label{display:flex;justify-content:space-between;font-weight:800;font-size:.9rem}
+.row label span.val{direction:ltr;unicode-bidi:plaintext;color:var(--amber)}
+input[type=range]{width:100%;accent-color:var(--cyan);height:28px}
+.tip{background:rgba(61,231,255,.06);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;line-height:1.7;font-size:.92rem;color:#c9d6ef}
+.tip strong{color:var(--cyan)}
+.tip .why{color:var(--amber);font-weight:800}
+.switcher{display:flex;gap:8px}
+.switcher button{flex:1;border:1px solid var(--line);background:rgba(0,0,0,.2);
+  border-radius:12px;padding:10px;font-weight:800}
+.switcher button.on{border-color:var(--amber);color:var(--amber);background:rgba(255,184,74,.1)}
+.foot{text-align:center;color:var(--muted);font-size:.75rem;padding:4px}
+@media(min-width:760px){
+  .layout{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;align-items:start}
+  .stage{min-height:320px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="badge">إلكترونيات ١٠١</div>
+    <h1>ثلاث دروس تفاعلية للمبتدئين</h1>
+    <p class="sub">حرّك المقاومات وشوف التيار والضوء يتغيّر — بدون أي سيرفر</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" class="on" data-lesson="1" aria-selected="true"><span class="n">١</span>سلسلة</button>
+    <button type="button" data-lesson="2"><span class="n">٢</span>توازي</button>
+    <button type="button" data-lesson="3"><span class="n">٣</span>مفتوحة / قصر</button>
+  </nav>
+
+  <div class="layout">
+    <section class="card stage" id="stage">
+      <svg class="circuit" id="svg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" aria-label="دائرة كهربائية">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+          <linearGradient id="batGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd28a"/><stop offset="100%" stop-color="#c97a20"/></linearGradient>
+          <radialGradient id="ledGrad" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#fff6c8"/><stop offset="55%" stop-color="#ffb020"/><stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="0" y="0" width="640" height="340" fill="transparent"/>
+        <g id="wires"></g>
+        <g id="parts"></g>
+        <g id="particles" filter="url(#glow)"></g>
+        <g id="labels"></g>
+      </svg>
+    </section>
+
+    <div style="display:grid;gap:12px">
+      <section class="card gauges" id="gauges">
+        <div class="g"><div class="k">الجهد V</div><div class="v amber" id="gV">9.0 V</div></div>
+        <div class="g"><div class="k">التيار I</div><div class="v cyan" id="gI">0.00 A</div></div>
+        <div class="g"><div class="k">المقاومة R</div><div class="v green" id="gR">— Ω</div></div>
+      </section>
+
+      <section class="card controls" id="controls"></section>
+      <section class="card tip" id="tip"></section>
+    </div>
+  </div>
+
+  <p class="foot">V · I · R بالرموز اللاتينية · يعمل بعد التحميل بدون نت</p>
+</div>
+
+<script>
+(function(){
+  const Vbat = 9;
+  const state = {
+    lesson: 1,
+    R1: 220,
+    R2: 220,
+    mode: 'series', // for lesson 2 toggle leftover; lesson1=series fixed,2=parallel fixed
+    path: 'closed', // lesson 3: closed | open | short
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  const wires = $('wires');
+  const parts = $('parts');
+  const particles = $('particles');
+  const labels = $('labels');
+
+  // --- math ---
+  function calc(){
+    if(state.lesson === 1){
+      const Req = state.R1 + state.R2;
+      const I = Vbat / Req;
+      const V1 = I * state.R1, V2 = I * state.R2;
+      return {Req, I, I1:I, I2:I, V1, V2, bright1: brightness(I), bright2: brightness(I), note:'series'};
+    }
+    if(state.lesson === 2){
+      const Req = 1 / (1/state.R1 + 1/state.R2);
+      const I1 = Vbat / state.R1, I2 = Vbat / state.R2, I = I1 + I2;
+      return {Req, I, I1, I2, V1:Vbat, V2:Vbat, bright1: brightness(I1), bright2: brightness(I2), note:'parallel'};
+    }
+    // lesson 3
+    if(state.path === 'open'){
+      return {Req: Infinity, I:0, I1:0, I2:0, V1:0, V2:0, bright1:0, bright2:0, note:'open'};
+    }
+    if(state.path === 'short'){
+      // short across LED path — huge current, LED dark (bypassed), resistor still there partially
+      const Rshort = 0.5; // internal
+      const I = Vbat / Rshort;
+      return {Req: Rshort, I, I1:I, I2:0, V1:0, V2:0, bright1:0, bright2:0, note:'short'};
+    }
+    // closed: battery + R + LED (LED ~2V drop modeled as fixed + series R)
+    const Vled = 2.0;
+    const I = Math.max(0, (Vbat - Vled) / state.R1);
+    return {Req: state.R1, I, I1:I, I2:0, V1: I*state.R1, V2:Vled, bright1: brightness(I), bright2:0, note:'closed'};
+  }
+
+  function brightness(I){
+    // map ~0–40mA to 0–1 for LED glow
+    return Math.max(0, Math.min(1, I / 0.04));
+  }
+
+  // --- drawing helpers ---
+  function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
+
+  function el(name, attrs, parent){
+    const n = document.createElementNS('http://www.w3.org/2000/svg', name);
+    for(const k in attrs) n.setAttribute(k, attrs[k]);
+    (parent||svg).appendChild(n);
+    return n;
+  }
+
+  function wirePath(d, extra){
+    return el('path', Object.assign({d, fill:'none', stroke:'var(--wire)', 'stroke-width':3, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, extra||{}), wires);
+  }
+
+  function battery(x,y){
+    const g = el('g', {transform:`translate(${x},${y})`}, parts);
+    el('rect', {x:-18,y:-28,width:36,height:56,rx:6, fill:'#1a2438', stroke:'var(--amber)', 'stroke-width':1.5}, g);
+    el('rect', {x:-12,y:-18,width:24,height:14,rx:2, fill:'url(#batGrad)'}, g);
+    el('rect', {x:-12,y:4,width:24,height:14,rx:2, fill:'#3a4558'}, g);
+    el('text', {x:0,y:-4, fill:'#1a1208', 'font-size':10, 'font-weight':900, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent='+';
+    el('text', {x:0,y:15, fill:'#cdd', 'font-size':10, 'font-weight':900, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent='−';
+    el('text', {x:0,y:42, fill:'var(--amber)', 'font-size':12, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo', direction:'ltr'}, g).textContent='9 V';
+    return g;
+  }
+
+  function resistor(x,y,label,rot){
+    const g = el('g', {transform:`translate(${x},${y}) rotate(${rot||0})`}, parts);
+    const zig = 'M-28,0 L-20,-10 L-10,10 L0,-10 L10,10 L20,-10 L28,0';
+    el('path', {d:zig, fill:'none', stroke:'#9eb0d0', 'stroke-width':3, 'stroke-linecap':'round', 'stroke-linejoin':'round'}, g);
+    el('text', {x:0,y:22, fill:'var(--green)', 'font-size':13, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo', direction:'ltr'}, g).textContent=label;
+    return g;
+  }
+
+  function led(x,y,b,label){
+    const g = el('g', {transform:`translate(${x},${y})`}, parts);
+    const glowR = 8 + b*28;
+    if(b > 0.02){
+      el('circle', {cx:0, cy:0, r:glowR, fill:'url(#ledGrad)', opacity:0.35+b*0.55, filter:'url(#soft)'}, g);
+    }
+    el('circle', {cx:0, cy:0, r:14, fill: b>0.02 ? `rgba(255,${Math.floor(160+80*b)},40,${0.4+0.5*b})` : '#2a3348',
+      stroke: b>0.02 ? '#ffd56a' : '#6a7a98', 'stroke-width':2}, g);
+    el('polygon', {points:'-6,-4 6,0 -6,4', fill: b>0.5 ? '#fff8e0' : '#c8d0e0'}, g);
+    if(label) el('text', {x:0,y:28, fill:'var(--led)', 'font-size':12, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo'}, g).textContent=label;
+    return g;
+  }
+
+  function labelAt(x,y,text,color){
+    el('text', {x,y, fill:color||'var(--muted)', 'font-size':13, 'font-weight':800, 'text-anchor':'middle', 'font-family':'Cairo'}, labels).textContent=text;
+  }
+
+  // path samples for particles
+  let flowPaths = []; // array of {d, speedScale}
+
+  function drawLesson(){
+    clear(wires); clear(parts); clear(labels); clear(particles);
+    flowPaths = [];
+    const m = calc();
+
+    if(state.lesson === 1){
+      // SERIES: battery left, R1 top, LED1, R2, LED2 bottom back
+      // Layout: bat at (80,170), top wire to R1(220,80), LED1(360,80), R2(500,80), right down, bottom back
+      battery(80,170);
+      resistor(220,80, `R1 ${state.R1}Ω`);
+      led(360,80, m.bright1, 'LED1');
+      resistor(500,80, `R2 ${state.R2}Ω`);
+      led(500,260, m.bright2, 'LED2');
+
+      // wires
+      wirePath('M80,142 L80,80 L192,80'); // bat+ to R1
+      wirePath('M248,80 L346,80'); // R1 to LED1
+      wirePath('M374,80 L472,80'); // LED1 to R2
+      wirePath('M528,80 L560,80 L560,260 L514,260'); // R2 to LED2
+      wirePath('M486,260 L80,260 L80,198'); // LED2 back to bat-
+
+      flowPaths = [
+        {d:'M80,142 L80,80 L192,80 L248,80 L346,80 L374,80 L472,80 L528,80 L560,80 L560,260 L514,260 L486,260 L80,260 L80,198', speed:1}
+      ];
+      labelAt(320,40, 'نفس التيار يمر على الكل · I₁ = I₂', 'var(--cyan)');
+      labelAt(320,310, `V₁=${m.V1.toFixed(1)}V  ·  V₂=${m.V2.toFixed(1)}V  ·  المجموع ${Vbat}V`, 'var(--amber)');
+    }
+
+    if(state.lesson === 2){
+      // PARALLEL: two branches
+      battery(80,170);
+      resistor(300,90, `R1 ${state.R1}Ω`);
+      led(460,90, m.bright1, 'LED1');
+      resistor(300,250, `R2 ${state.R2}Ω`);
+      led(460,250, m.bright2, 'LED2');
+
+      wirePath('M80,142 L80,70 L240,70'); // top rail start
+      wirePath('M240,70 L272,90'); // into R1
+      wirePath('M328,90 L446,90'); // R1 to LED1
+      wirePath('M474,90 L560,90 L560,170'); // LED1 to right rail
+
+      wirePath('M80,198 L80,270 L240,270'); // bottom from bat
+      wirePath('M240,270 L272,250');
+      wirePath('M328,250 L446,250');
+      wirePath('M474,250 L560,250 L560,170');
+
+      // junction markers
+      el('circle',{cx:240,cy:70,r:4,fill:'var(--cyan)'},parts);
+      el('circle',{cx:240,cy:270,r:4,fill:'var(--cyan)'},parts);
+      el('circle',{cx:560,cy:170,r:4,fill:'var(--cyan)'},parts);
+      // left split visual
+      wirePath('M80,170 L240,170', {stroke:'var(--wire)', 'stroke-dasharray':'4 6', opacity:.4});
+      wirePath('M240,70 L240,270');
+      wirePath('M80,142 L80,198'); // bat body already has terminals
+
+      flowPaths = [
+        {d:'M80,142 L80,70 L240,70 L272,90 L328,90 L446,90 L474,90 L560,90 L560,170', speed: m.I1 / Math.max(m.I,1e-9)},
+        {d:'M80,198 L80,270 L240,270 L272,250 L328,250 L446,250 L474,250 L560,250 L560,170', speed: m.I2 / Math.max(m.I,1e-9)},
+        {d:'M560,170 L80,170 L80,198', speed:1} // return - simplified visual along mid then down — actually return to negative
+      ];
+      // better return path particles from right rail to bat negative
+      flowPaths[2] = {d:'M560,170 L560,198 C560,198 80,198 80,198', speed:1};
+
+      labelAt(320,30, 'نفس الجهد على الفرعين · V₁ = V₂ = 9V', 'var(--cyan)');
+      labelAt(320,320, `I₁=${(m.I1*1000).toFixed(0)}mA  ·  I₂=${(m.I2*1000).toFixed(0)}mA  ·  الكلي ${(m.I*1000).toFixed(0)}mA`, 'var(--amber)');
+    }
+
+    if(state.lesson === 3){
+      battery(100,170);
+      resistor(300,100, `R ${state.R1}Ω`);
+      led(480,170, m.bright1, 'LED');
+
+      // main loop
+      wirePath('M100,142 L100,100 L272,100'); // to R
+      wirePath('M328,100 L480,100 L480,156'); // to LED top
+      wirePath('M480,184 L480,240 L100,240 L100,198'); // back
+
+      if(state.path === 'open'){
+        // gap in top wire after resistor
+        clear(wires); clear(parts); clear(labels);
+        battery(100,170);
+        resistor(300,100, `R ${state.R1}Ω`);
+        led(480,170, 0, 'LED');
+        wirePath('M100,142 L100,100 L272,100');
+        wirePath('M328,100 L400,100'); // stops — open
+        wirePath('M430,100 L480,100 L480,156');
+        // open gap markers
+        el('circle',{cx:405,cy:100,r:5,fill:'none',stroke:'var(--pink)','stroke-width':2},parts);
+        el('circle',{cx:425,cy:100,r:5,fill:'none',stroke:'var(--pink)','stroke-width':2},parts);
+        labelAt(415,80, 'فتحة · ما في مسار', 'var(--pink)');
+        wirePath('M480,184 L480,240 L100,240 L100,198');
+        flowPaths = [];
+        labelAt(320,300, 'دائرة مفتوحة = تيار صفر = الضوء يطفي', 'var(--pink)');
+      } else if(state.path === 'short'){
+        clear(wires); clear(parts); clear(labels);
+        battery(100,170);
+        resistor(300,100, `R ${state.R1}Ω`);
+        led(480,170, 0, 'LED');
+        wirePath('M100,142 L100,100 L272,100');
+        wirePath('M328,100 L480,100 L480,156');
+        wirePath('M480,184 L480,240 L100,240 L100,198');
+        // short wire bypassing LED (thick amber)
+        wirePath('M400,100 L400,240', {stroke:'var(--amber)', 'stroke-width':4});
+        labelAt(370,170, 'قصر!', 'var(--amber)');
+        el('text',{x:455,y:210,fill:'var(--muted)','font-size':11,'font-weight':700,'text-anchor':'middle','font-family':'Cairo'},labels).textContent='LED متجاوَز';
+        flowPaths = [
+          {d:'M100,142 L100,100 L272,100 L328,100 L400,100 L400,240 L100,240 L100,198', speed:2}
+        ];
+        labelAt(320,300, 'القصر مسار سهل — تيار كبير وخطر، والضوء ينطفي', 'var(--amber)');
+      } else {
+        flowPaths = [
+          {d:'M100,142 L100,100 L272,100 L328,100 L480,100 L480,156 L480,184 L480,240 L100,240 L100,198', speed:1}
+        ];
+        labelAt(320,300, 'دائرة مغلقة سليمة — التيار يمر عبر R والـ LED', 'var(--green)');
+      }
+    }
+
+    updateGauges(m);
+    updateTip(m);
+    rebuildParticles(m);
+  }
+
+  function updateGauges(m){
+    $('gV').textContent = Vbat.toFixed(1) + ' V';
+    if(!isFinite(m.Req)){
+      $('gI').textContent = '0 mA';
+      $('gR').textContent = '∞';
+    } else if(state.lesson===3 && state.path==='short'){
+      $('gI').textContent = (m.I).toFixed(1) + ' A !';
+      $('gR').textContent = '≈0 Ω';
+    } else {
+      $('gI').textContent = (m.I*1000).toFixed(1) + ' mA';
+      $('gR').textContent = (m.Req >= 100 ? m.Req.toFixed(0) : m.Req.toFixed(1)) + ' Ω';
+    }
+  }
+
+  function updateTip(m){
+    const tip = $('tip');
+    if(state.lesson===1){
+      tip.innerHTML = `<div class="why">ليش الضوءين نفس القوة تقريبًا؟</div>
+        في <strong>التوصيل على التوالي (Series)</strong> التيار واحد يمر على كل القطع بالترتيب.
+        المقاومة الكلية = R1 + R2 = <span dir="ltr">${m.Req.toFixed(0)} Ω</span>.
+        كل مقاومة تاخذ جزء من الجهد، ولو زوّدت R يقل التيار ويخفت الضوءين معًا.`;
+    } else if(state.lesson===2){
+      tip.innerHTML = `<div class="why">ليش كل فرع مستقل؟</div>
+        في <strong>التوازي (Parallel)</strong> كل فرع ياخذ نفس الجهد (${Vbat} V).
+        التيار ينقسم: الفرع الأصغر مقاومةً ياخذ تيار أكثر ويضيء أقوى.
+        R الكلية = <span dir="ltr">${m.Req.toFixed(0)} Ω</span> (أقل من أصغر مقاومة).`;
+    } else {
+      if(state.path==='open'){
+        tip.innerHTML = `<div class="why">دائرة مفتوحة</div>
+          المسار مقطوع — مثل مفتاح مطفي. <strong>I = 0</strong> والضوء ينطفي حتى لو البطارية موجودة.
+          الكهرباء تحتاج حلقة مغلقة عشان تمشي.`;
+      } else if(state.path==='short'){
+        tip.innerHTML = `<div class="why">قصر كهربائي (Short)</div>
+          سلك يوفّر طريق أسهل من الـ LED، فالتيار يهرب من الطريق القصير.
+          الـ LED ينطفي والتيار يصير <strong>كبير وخطر</strong> على البطارية والأسلاك. لا تسوي قصر بالبيت!`;
+      } else {
+        tip.innerHTML = `<div class="why">دائرة مغلقة مع مقاومة</div>
+          المقاومة R تحد التيار عشان الـ LED ما يحترق.
+          قلّل R → تيار أكبر → ضوء أقوى. زوّد R → أخف وأأمن.`;
+      }
+    }
+  }
+
+  // --- controls ---
+  function renderControls(){
+    const c = $('controls');
+    let html = '';
+    if(state.lesson===1 || state.lesson===2){
+      html += rowHTML('R1', 'R1', state.R1, 50, 1000);
+      html += rowHTML('R2', 'R2', state.R2, 50, 1000);
+    } else {
+      html += `<div class="switcher">
+        <button type="button" data-path="closed" class="${state.path==='closed'?'on':''}">مغلقة</button>
+        <button type="button" data-path="open" class="${state.path==='open'?'on':''}">مفتوحة</button>
+        <button type="button" data-path="short" class="${state.path==='short'?'on':''}">قصر</button>
+      </div>`;
+      html += rowHTML('R1', 'المقاومة R', state.R1, 50, 1000);
+    }
+    c.innerHTML = html;
+    c.querySelectorAll('input[type=range]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        state[inp.dataset.key] = +inp.value;
+        drawLesson();
+        // update label
+        const lab = inp.previousElementSibling?.querySelector('.val');
+        if(lab) lab.textContent = inp.value + ' Ω';
+      });
+    });
+    c.querySelectorAll('[data-path]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.path = btn.dataset.path;
+        renderControls();
+        drawLesson();
+      });
+    });
+  }
+
+  function rowHTML(key, title, val, min, max){
+    return `<div class="row"><label>${title}<span class="val">${val} Ω</span></label>
+      <input type="range" min="${min}" max="${max}" step="10" value="${val}" data-key="${key}"></div>`;
+  }
+
+  // --- particles ---
+  let particleObjs = [];
+  let lastT = 0;
+
+  function rebuildParticles(m){
+    clear(particles);
+    particleObjs = [];
+    if(m.I < 1e-6 && state.path !== 'short') return;
+    const countBase = state.lesson===3 && state.path==='short' ? 28 : 14;
+    flowPaths.forEach((fp, pi)=>{
+      const pathEl = el('path', {d:fp.d, fill:'none', stroke:'none'}, particles);
+      const len = pathEl.getTotalLength();
+      const n = Math.max(4, Math.round(countBase * (fp.speed||1)));
+      for(let i=0;i<n;i++){
+        const c = el('circle', {r: state.path==='short'?3.2:2.6, fill: state.path==='short'?'var(--amber)':'var(--cyan)', opacity:.9}, particles);
+        particleObjs.push({el:c, path:pathEl, len, t: i/n, speed:(0.12 + 0.25*(fp.speed||1)) * (state.path==='short'?2.2:1) * Math.min(1.8, 0.4+m.I*40)});
+      }
+    });
+  }
+
+  function tick(ts){
+    if(!lastT) lastT = ts;
+    const dt = Math.min(50, ts - lastT) / 1000;
+    lastT = ts;
+    particleObjs.forEach(p=>{
+      p.t = (p.t + p.speed * dt) % 1;
+      const pt = p.path.getPointAtLength(p.t * p.len);
+      p.el.setAttribute('cx', pt.x);
+      p.el.setAttribute('cy', pt.y);
+    });
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // --- tabs ---
+  document.querySelectorAll('.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tabs button').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-selected','false');});
+      btn.classList.add('on'); btn.setAttribute('aria-selected','true');
+      state.lesson = +btn.dataset.lesson;
+      if(state.lesson===3) state.path = 'closed';
+      renderControls();
+      drawLesson();
+    });
+  });
+
+  renderControls();
+  drawLesson();
+})();
+</script>
+</body>
+</html>
